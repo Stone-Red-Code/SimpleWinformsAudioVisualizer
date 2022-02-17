@@ -1,10 +1,6 @@
 ﻿using NAudio.Dsp;
+
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AudioVisualizer
 {
@@ -12,16 +8,16 @@ namespace AudioVisualizer
     *This class is not created by me(Stone_Red)
     *I forgot who mad this class if i find the source of this class i will credit the original creator
     */
-    class SampleAggregator
+    internal class SampleAggregator
     {
         // FFT
         public event EventHandler<FftEventArgs> FftCalculated;
         public bool PerformFFT { get; set; }
-        private Complex[] fftBuffer;
-        private FftEventArgs fftArgs;
+        private readonly Complex[] fftBuffer;
+        private readonly FftEventArgs fftArgs;
         private int fftPos;
-        private int fftLength;
-        private int m;
+        private readonly int fftLength;
+        private readonly int m;
 
         public SampleAggregator(int fftLength)
         {
@@ -29,13 +25,13 @@ namespace AudioVisualizer
             {
                 throw new ArgumentException("FFT Length must be a power of two");
             }
-            this.m = (int)Math.Log(fftLength, 2.0);
+            m = (int)Math.Log(fftLength, 2.0);
             this.fftLength = fftLength;
-            this.fftBuffer = new Complex[fftLength];
-            this.fftArgs = new FftEventArgs(fftBuffer);
+            fftBuffer = new Complex[fftLength];
+            fftArgs = new FftEventArgs(fftBuffer);
         }
 
-        bool IsPowerOfTwo(int x)
+        private bool IsPowerOfTwo(int x)
         {
             return (x & (x - 1)) == 0;
         }
@@ -61,7 +57,7 @@ namespace AudioVisualizer
     {
         public FftEventArgs(Complex[] result)
         {
-            this.Result = result;
+            Result = result;
         }
         public Complex[] Result { get; private set; }
     }

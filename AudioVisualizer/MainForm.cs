@@ -1,12 +1,7 @@
 ﻿using NAudio.Wave;
+
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace AudioVisualizer
@@ -19,8 +14,8 @@ namespace AudioVisualizer
         }
 
         private IWaveIn waveIn;
-        private static int fftLength = 1024; // Has to be powers of two!
-        private SampleAggregator sampleAggregator = new SampleAggregator(fftLength);
+        private static readonly int fftLength = 1024; // Has to be powers of two!
+        private readonly SampleAggregator sampleAggregator = new SampleAggregator(fftLength);
 
         private void MainForm_Load(object sender, EventArgs e)
         {
@@ -47,8 +42,6 @@ namespace AudioVisualizer
             chart1.Series[0].ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Column;
             chart1.Series[0]["PointWidth"] = "1";
 
-
-
             //Set waveIn to WasapiLoopbackCapture to capture the system Audio
             waveIn = new WasapiLoopbackCapture();
 
@@ -57,16 +50,14 @@ namespace AudioVisualizer
             waveIn.StartRecording();
         }
 
-
-        void OnDataAvailable(object sender, WaveInEventArgs e)
+        private void OnDataAvailable(object sender, WaveInEventArgs e)
         {
-            if (this.InvokeRequired)
+            if (InvokeRequired)
             {
-                this.BeginInvoke(new EventHandler<WaveInEventArgs>(OnDataAvailable), sender, e);
+                BeginInvoke(new EventHandler<WaveInEventArgs>(OnDataAvailable), sender, e);
             }
             else
             {
-
                 byte[] buffer = e.Buffer;
                 int bytesRecorded = e.BytesRecorded;
                 int bufferIncrement = waveIn.WaveFormat.BlockAlign;
@@ -79,9 +70,9 @@ namespace AudioVisualizer
             }
         }
 
-        List<double> lastFft = new List<double>();
+        private List<double> lastFft = new List<double>();
 
-        void FftCalculated(object sender, FftEventArgs e)
+        private void FftCalculated(object sender, FftEventArgs e)
         {
             List<double> fft = new List<double>();
 
@@ -100,7 +91,7 @@ namespace AudioVisualizer
                 //Dampening the fft
                 for (int i = 0; i < fft.Count; i++)
                 {
-                    if(fft[i] > lastFft[i] || bufferValueNumericUpDown.Value == 0)
+                    if (fft[i] > lastFft[i] || bufferValueNumericUpDown.Value == 0)
                     {
                         fft[i] = (fft[i] + lastFft[i]) / 2;
                     }
@@ -114,7 +105,7 @@ namespace AudioVisualizer
             int barCount = (int)barCountNumericUpDown.Value;
             List<double> scaledFft = new List<double>();
 
-            //Calculate voulume of bars
+            //Calculate volume of bars
             if (barCount > 0)
             {
                 int count = fft.Count / barCount;
@@ -136,6 +127,7 @@ namespace AudioVisualizer
             }
 
             #region flatten
+
             int flattenValue = (int)flattenValueNumericUpDown.Value;
 
             //flatten the values
@@ -147,7 +139,9 @@ namespace AudioVisualizer
                     for (int j = 0; j < flattenValue; j++)
                     {
                         if (i + j < scaledFft.Count)
+                        {
                             temp += scaledFft[i + j];
+                        }
                     }
                     scaledFft[i] = temp / flattenValue;
                 }
@@ -161,15 +155,17 @@ namespace AudioVisualizer
                     for (int j = 0; j < flattenValue; j++)
                     {
                         if (i - j >= 0)
+                        {
                             temp += scaledFft[i - j];
+                        }
                     }
                     scaledFft[i] = temp / flattenValue;
                 }
             }
-            #endregion
 
+            #endregion flatten
 
-            //Clear and add cuurent data to chart1
+            //Clear and add current data to chart1
             lastFft = fft;
             chart1.Series[0].Points.Clear();
 
