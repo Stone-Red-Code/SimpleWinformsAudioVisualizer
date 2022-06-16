@@ -54,7 +54,7 @@ namespace AudioVisualizer
         {
             if (InvokeRequired)
             {
-                BeginInvoke(new EventHandler<WaveInEventArgs>(OnDataAvailable), sender, e);
+                _ = BeginInvoke(new EventHandler<WaveInEventArgs>(OnDataAvailable), sender, e);
             }
             else
             {
@@ -77,13 +77,13 @@ namespace AudioVisualizer
             List<double> fft = new List<double>();
 
             //Adding values form e.Result to fft List
-            for (int i = 0; i < e.Result.Length / 2 - 70; i++)
+            for (int i = 0; i < (e.Result.Length / 2) - 70; i++)
             {
                 fft.Add(Math.Abs(e.Result[i].Y * i / (200 - volumeTrackBar.Value)));
             }
 
-            //set volumeLabel to the current volume
-            volumeLabel.Text = "Volume: " + (volumeTrackBar.Value + 1) + " | " + (200 - volumeTrackBar.Value);
+            //Set volumeLabel to the current volume
+            volumeLabel.Text = "Amplifier: " + (volumeTrackBar.Value + 1);
 
             //Check if the previous fft list isn't 0
             if (lastFft.Count != 0)
@@ -97,7 +97,7 @@ namespace AudioVisualizer
                     }
                     else
                     {
-                        fft[i] = lastFft[i] - (double)bufferValueNumericUpDown.Value / 1000;
+                        fft[i] = lastFft[i] - ((1.1 - (double)bufferValueNumericUpDown.Value) / 1000);
                     }
                 }
             }
@@ -113,7 +113,7 @@ namespace AudioVisualizer
                 {
                     double temp = 0;
                     int j;
-                    for (j = i * count; j < count + i * count; j++)
+                    for (j = i * count; j < count + (i * count); j++)
                     {
                         temp += fft[j];
                     }
@@ -171,7 +171,7 @@ namespace AudioVisualizer
 
             for (int i = 0; i < scaledFft.Count; i++)
             {
-                chart1.Series[0].Points.AddY(scaledFft[i]);
+                _ = chart1.Series[0].Points.AddY(scaledFft[i]);
             }
         }
 
